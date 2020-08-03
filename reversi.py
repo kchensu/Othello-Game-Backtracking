@@ -12,6 +12,7 @@ class Reversi:
         self.board = board
         self.turn = turn
         self.state = self.GAME_STATES['IN_PROGRESS']
+        self.legal_moves = None
     
     def find_legal_positions(self):
         # valid = ([  [" ", " ", " ", " ", " ", " ", " ", " "], 
@@ -28,16 +29,17 @@ class Reversi:
         for row in range(8):
             for col in range(8):
                 if (self.board[row][col] == " "):
-                    north_west = self.check_valid_moves(self.turn, -1, -1, row, col, self.board)
-                    north_east = self.check_valid_moves(self.turn, -1,  1, row, col, self.board)
-                    north      = self.check_valid_moves(self.turn, -1,  0, row, col, self.board)
+                          
+                    north_west = self.check_valid_moves(-1, -1, row, col)
+                    north_east = self.check_valid_moves(-1,  1, row, col)
+                    north      = self.check_valid_moves(-1,  0, row, col)
 
-                    south_west = self.check_valid_moves(self.turn,  1, -1, row, col, self.board)
-                    south_east = self.check_valid_moves(self.turn,  1,  1, row, col, self.board)
-                    south      = self.check_valid_moves(self.turn,  1,  0, row, col, self.board)
+                    south_west = self.check_valid_moves( 1, -1, row, col)
+                    south_east = self.check_valid_moves( 1,  1, row, col)
+                    south      = self.check_valid_moves( 1,  0, row, col)
 
-                    west       = self.check_valid_moves(self.turn,  0, -1, row, col, self.board)
-                    east       = self.check_valid_moves(self.turn,  0,  1, row, col, self.board)
+                    west       = self.check_valid_moves( 0, -1, row, col)
+                    east       = self.check_valid_moves( 0,  1, row, col)
                 
                     if (north_west or north_east or north or south_east or south_west or south or west or east):
                         valid.append(np.array([row, col]))
@@ -47,15 +49,15 @@ class Reversi:
                         #     for j in range(8):
                         #         print(valid[i][j], end= " ")
                         #     print(end= '\n')
-        # print(valid)
+        self.legal_moves = valid
         return valid
 
-    def check_valid_moves(self, turn, delta_row, delta_col, row , col, board): 
+    def check_valid_moves(self, delta_row, delta_col, row , col): 
 
         other = None
-        if (turn == 'b'):
+        if (self.turn == 'b'):
             other = 'w'
-        elif(turn == 'w'):
+        elif(self.turn == 'w'):
             other = 'b'
         else:
             return False
@@ -68,53 +70,98 @@ class Reversi:
             return False
         
         # check if position at row, col contains the opposite of "turn" on the board
-        if board[row + delta_row][col + delta_col] != other :
+        if self.board[row + delta_row][col + delta_col] != other :
             return False
         # check if two position away doesn't end up outside bounds
         if (row + delta_row + delta_row < 0) or (row + delta_row + delta_row >= 8):
             return False
         if (col + delta_col + delta_col < 0) or (col + delta_col + delta_col >= 8):
             return False
-        return self.check_line(turn, delta_row, delta_col, row + delta_row + delta_row, col + delta_col + delta_col, board)        
+       
+        return self.check_line(delta_row, delta_col, row + delta_row + delta_row, col + delta_col + delta_col)        
         # check if the line matches the color
 
-    def check_line(self, turn, delta_row, delta_col, row, col, board):
-
-        if (self.board[row][col] == turn):
+    def check_line(self, delta_row, delta_col, row, col):
+        
+        if (self.board[row][col] == self.turn):
             return True
         if row + delta_row < 0 or row + delta_row >= 8:
             return False
         if col + delta_col < 0 or col + delta_col >= 8:
             return False
+        if self.board[row][col] == " ":
+            return False
 
-        return self.check_line(turn, delta_row, delta_col, row + delta_row, col + delta_col, board)
+        return self.check_line(delta_row, delta_col, row + delta_row, col + delta_col)
     
-    def flip_token(self, turn, row, col, board):
-
-        flip_line(self.turn, -1, -1, row, col, self.board)
-        flip_line(self.turn, -1,  1, row, col, self.board)
-        flip_line(self.turn, -1,  0, row, col, self.board)
-        flip_line(self.turn,  1, -1, row, col, self.board)
-        flip_line(self.turn,  1,  1, row, col, self.board)
-        flip_line(self.turn,  1,  0, row, col, self.board)
-        flip_line(self.turn,  0, -1, row, col, self.board)
-        flip_line(self.turn,  0,  1, row, col, self.board)
+    def flip_token(self, row, col):
+      
+        self.flip_line(-1, -1, row, col)
+        self.flip_line(-1,  1, row, col)
+        self.flip_line(-1,  0, row, col)
+        self.flip_line( 1, -1, row, col)
+        self.flip_line( 1,  1, row, col)
+        self.flip_line( 1,  0, row, col)
+        self.flip_line( 0, -1, row, col)
+        self.flip_line( 0,  1, row, col)
+     
     
-    def flip_line(self, turn, delta_row, delta_col, row, col, board):
+    def flip_line(self, delta_row, delta_col, row, col):
+  
         if row + delta_row < 0 or row + delta_row >= 8:
             return False
         if col + delta_col < 0 or col + delta_col >= 8:
             return False
-        if board[row + delta_row][col + delta_col] != " ":
+        if self.board[row + delta_row][col + delta_col] == " ":
             return False
-        if board[row + delta_row][col + delta_col] == turn:
+        if self.board[row + delta_row][col + delta_col] == self.turn:
             return True
         else:
-            if self.flip_line(turn, delta_row, delta_col, row + delta_row, col + delta_col, board):
-                board[row + delta][col + delta_col] = turn
+            if self.flip_line(delta_row, delta_col, row + delta_row, col + delta_col):
+                self.board[row + delta_row][col + delta_col] = self.turn
                 return True
             else:
                 return False
+    
+    def is_move_valid(self, coords):
+        legal_moves = self.find_legal_positions()
+        if coords in legal_moves:
+            return True
+        else:
+            return False
+
+    def place_tile(self, coords):
+        self.board[coords[0]][coords[1]] = self.turn
+        
+        self.flip_token(coords[0], coords[1])
+
+    def switch_turn(self):
+        if self.turn == 'b':
+            self.turn = 'w'
+        elif self.turn == 'w':
+            self.turn = 'b'
+    
+    def update_state(self):
+        if len(self.legal_moves) != 0:
+            self.state = self.GAME_STATES['IN_PROGRESS']
+        else:
+            black_count = 0
+            white_count = 0
+
+            for tile in self.board:
+                if tile == " ":
+                    continue
+                elif tile == 'b':
+                    black_count += 1
+                elif tile == 'w':
+                    white_count += 1
+            if black_count > white_count:
+                self.state = self.GAME_STATES['BLACK_WINS']
+            elif white_count > black_count:
+                self.state = self.GAME_STATES['WHITE_WINS']
+            elif white_count == black_count:
+                self.state = self.GAME_STATES['TIE']
+
 
 def print_board(board):
     print("   0 1 2 3 4 5 6 7")
@@ -133,42 +180,30 @@ def print_board(board):
     print("6 |  %s|  %s|  %s|  %s|  %s|  %s|  %s|  %s|" %(board[6][0], board[6][1], board[6][2], board[6][3], board[6][4], board[6][5], board[6][6], board[6][7]))
     print("  -  ---  ---  ---  ---  ---  -")  
     print("7 |  %s|  %s|  %s|  %s|  %s|  %s|  %s|  %s|" %(board[7][0], board[7][1], board[7][2], board[7][3], board[7][4], board[7][5], board[7][6], board[7][7]))
-            
-
-
         
-
-        
-    
-    
-
-
-
-      
-
-
-
-
-        
-       
-
-    
-
-
-
 def main():
-    initial_board = np.array([              [" ", " ", " ", " ", " ", " ", " ", " "], 
-                                            [" ", " ", " ", " ", " ", " ", " ", " "], 
-                                            [" ", " ", " ", " ", " ", " ", " ", " "], 
-                                            [" ", " ", " ", "b", "w", " ", " ", " "], 
-                                            [" ", " ", " ", "w", "b", " ", " ", " "], 
+    initial_board = np.array([              [" ", " ", " ", " ", " ", " ", "b", "w"], 
+                                            [" ", " ", " ", " ", " ", " ", "b", " "], 
+                                            [" ", " ", " ", " ", " ", "w", "b", " "], 
+                                            [" ", " ", " ", "w", "w", "w", "w", "w"], 
+                                            [" ", " ", "w", "w", "w", " ", " ", " "], 
                                             [" ", " ", " ", " ", " ", " ", " ", " "], 
                                             [" ", " ", " ", " ", " ", " ", " ", " "], 
                                             [" ", " ", " ", " ", " ", " ", " ", " "]])
     
     test = Reversi(initial_board, 'b')
     test.find_legal_positions()
-    print_board(initial_board)
+    test.place_tile([5, 2])
+    print_board(test.board)
+    test.switch_turn()
+    print(test.find_legal_positions())
+    test.place_tile([0,5])
+    print_board(test.board)
+    test.switch_turn()
+    test.place_tile([4,5])
+    print_board(test.board)
+
+   
 
 
 if __name__ == "__main__":
