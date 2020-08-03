@@ -15,21 +15,10 @@ class Reversi:
         self.legal_moves = None
     
     def find_legal_positions(self):
-        # valid = ([  [" ", " ", " ", " ", " ", " ", " ", " "], 
-        #             [" ", " ", " ", " ", " ", " ", " ", " "], 
-        #             [" ", " ", " ", " ", " ", " ", " ", " "], 
-        #             [" ", " ", " ", " ", " ", " ", " ", " "], 
-        #             [" ", " ", " ", " ", " ", " ", " ", " "], 
-        #             [" ", " ", " ", " ", " ", " ", " ", " "], 
-        #             [" ", " ", " ", " ", " ", " ", " ", " "], 
-        #             [" ", " ", " ", " ", " ", " ", " ", " "]])
         valid = [] 
-
-     
         for row in range(8):
             for col in range(8):
-                if (self.board[row][col] == " "):
-                          
+                if (self.board[row][col] == " "):     
                     north_west = self.check_valid_moves(-1, -1, row, col)
                     north_east = self.check_valid_moves(-1,  1, row, col)
                     north      = self.check_valid_moves(-1,  0, row, col)
@@ -43,12 +32,7 @@ class Reversi:
                 
                     if (north_west or north_east or north or south_east or south_west or south or west or east):
                         valid.append(np.array([row, col]))
-                        # valid[row][col] = self.turn
 
-                        # for i in range(8):
-                        #     for j in range(8):
-                        #         print(valid[i][j], end= " ")
-                        #     print(end= '\n')
         self.legal_moves = np.array(valid)
         return valid
 
@@ -61,8 +45,6 @@ class Reversi:
             other = 'b'
         else:
             return False
-        
-        # check for bounds in the board
         if (row + delta_row < 0) or (row + delta_row >= 8):
             return False
 
@@ -148,19 +130,23 @@ class Reversi:
             black_count = 0
             white_count = 0
 
-            for tile in self.board:
-                if tile == " ":
-                    continue
-                elif tile == 'b':
-                    black_count += 1
-                elif tile == 'w':
-                    white_count += 1
+            for i in range(8):
+                for j in range(8):
+                    if self.board[i][j] == " ":
+                        continue
+                    elif self.board[i][j] == 'b':
+                        black_count += 1
+                    elif self.board[i][j] == 'w':
+                        white_count += 1
+            print(black_count)
+            print(white_count)
             if black_count > white_count:
                 self.state = self.GAME_STATES['BLACK_WINS']
             elif white_count > black_count:
                 self.state = self.GAME_STATES['WHITE_WINS']
             elif white_count == black_count:
                 self.state = self.GAME_STATES['TIE']
+            
     
     def is_move_valid(self, coords):
         for valid_coord in self.legal_moves:
@@ -195,11 +181,11 @@ def print_board(board):
     print("7 |  %s|  %s|  %s|  %s|  %s|  %s|  %s|  %s|" %(board[7][0], board[7][1], board[7][2], board[7][3], board[7][4], board[7][5], board[7][6], board[7][7]))
         
 def main():
-    initial_board = np.array([              [" ", " ", " ", " ", " ", " ", "b", "w"], 
-                                            [" ", " ", " ", " ", " ", " ", "b", " "], 
-                                            [" ", " ", " ", " ", " ", "w", "b", " "], 
+    initial_board = np.array([              [" ", " ", " ", " ", " ", " ", "w", "w"], 
+                                            [" ", " ", " ", " ", " ", " ", "w", " "], 
+                                            [" ", " ", " ", " ", " ", "w", "w", " "], 
                                             [" ", " ", " ", "w", "w", "w", "w", "w"], 
-                                            [" ", " ", "w", "w", "w", " ", " ", " "], 
+                                            [" ", " ", "w", "w", "w", " ", "w", " "], 
                                             [" ", " ", " ", " ", " ", " ", " ", " "], 
                                             [" ", " ", " ", " ", " ", " ", " ", " "], 
                                             [" ", " ", " ", " ", " ", " ", " ", " "]])
@@ -207,7 +193,7 @@ def main():
     test = Reversi(initial_board, 'b')
     test.find_legal_positions()
     print(test.find_legal_positions())
-    print(test.is_move_valid([0 ,0]))
+    test.update_state()
     test.place_tile([5, 2])
     print_board(test.board)
     test.switch_turn()
