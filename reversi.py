@@ -50,7 +50,7 @@ class Reversi:
                         #     for j in range(8):
                         #         print(valid[i][j], end= " ")
                         #     print(end= '\n')
-        self.legal_moves = deepcopy(valid)
+        self.legal_moves = np.array(valid)
         return valid
 
     def check_valid_moves(self, delta_row, delta_col, row , col): 
