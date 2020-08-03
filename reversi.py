@@ -1,4 +1,5 @@
 import numpy as np
+from copy import deepcopy
 
 class Reversi:
     GAME_STATES = {
@@ -49,7 +50,7 @@ class Reversi:
                         #     for j in range(8):
                         #         print(valid[i][j], end= " ")
                         #     print(end= '\n')
-        self.legal_moves = valid[:]
+        self.legal_moves = deepcopy(valid)
         return valid
 
     def check_valid_moves(self, delta_row, delta_col, row , col): 
@@ -202,6 +203,7 @@ def main():
     test.switch_turn()
     test.place_tile([4,5])
     print_board(test.board)
+    print(test.find_legal_positions())
 
    
 
