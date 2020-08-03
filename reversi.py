@@ -1,5 +1,4 @@
 import numpy as np
-from copy import deepcopy
 
 class Reversi:
     GAME_STATES = {
@@ -162,6 +161,19 @@ class Reversi:
                 self.state = self.GAME_STATES['WHITE_WINS']
             elif white_count == black_count:
                 self.state = self.GAME_STATES['TIE']
+    
+    def is_move_valid(self, coords):
+        for valid_coord in self.legal_moves:
+            if coords[0] == valid_coord[0]:
+                if coords[1] == valid_coord[1]:
+                    return True
+                else:
+                    continue
+            else:
+                continue
+        return False
+
+                
 
 
 def print_board(board):
@@ -194,16 +206,18 @@ def main():
     
     test = Reversi(initial_board, 'b')
     test.find_legal_positions()
+    print(test.find_legal_positions())
+    print(test.is_move_valid([0 ,0]))
     test.place_tile([5, 2])
     print_board(test.board)
     test.switch_turn()
-    print(test.find_legal_positions())
-    test.place_tile([0,5])
-    print_board(test.board)
-    test.switch_turn()
-    test.place_tile([4,5])
-    print_board(test.board)
-    print(test.find_legal_positions())
+   
+    # test.place_tile([0,5])
+    # print_board(test.board)
+    # test.switch_turn()
+    # test.place_tile([4,5])
+    # print_board(test.board)
+    # print(test.find_legal_positions())
 
    
 
