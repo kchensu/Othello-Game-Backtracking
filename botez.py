@@ -26,12 +26,12 @@ class Botez:
             if game.state == "In progress": # game has not ended
                 game.switch_turn()
 
-    def train(self, game, N):
+    def train(self, game, N, max_time):
         """ return total training score of N random playouts """
         score = 0
         start = time()
         for i in range(N): # do N number of random playouts
-            if time() - start >= 5: # if more than 5 seconds
+            if time() - start >= max_time: # if more than 5 seconds
                 break
             temp_game = deepcopy(game)
             score += self.playout(temp_game)
@@ -49,7 +49,7 @@ class Botez:
             possible_game_state_after_legal_move = deepcopy(game) # make a copy of the current game
             possible_game_state_after_legal_move.place_tile(move) # play the legal move
             possible_game_state_after_legal_move.switch_turn() 
-            score = self.train(possible_game_state_after_legal_move, N=125) # ployout game N times
+            score = self.train(possible_game_state_after_legal_move, N=1000, max_time=10) # ployout game N times
             score_list.append(score)
         highest_score_index = score_list.index(max(score_list)) # pick the score with the most wins, highest score
         best_move = legal_moves[highest_score_index]

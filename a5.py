@@ -3,7 +3,7 @@ from reversi import *
 from botez import *
 from gm_hikaru import *
 from random import choice
-from time import sleep
+from time import sleep, time
 import numpy as np
 
 
@@ -138,11 +138,11 @@ def main():
                                 print("please pick a legal move coordinate")
                     else:
                         if GMHikaru_flag:
-                            board_coordinate = gm_hikaru_ai.find_best_move(game.board, game.turn)
-                            sleep(1)
+                            board_coordinate = gm_hikaru_ai.find_best_move(game.board, game.turn)     
                         if Botez_flag:
+                            start = time()
                             board_coordinate = botez_ai.find_best_move(game.board, game.turn)
-                            sleep(1)
+                            print("Botez took %.2f to make a move" %(time() - start))
                     game.place_tile(board_coordinate)
                 game.update_state()
                 if game.state == "In progress":

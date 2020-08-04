@@ -138,8 +138,7 @@ class Reversi:
                         black_count += 1
                     elif self.board[i][j] == 'w':
                         white_count += 1
-            print(black_count)
-            print(white_count)
+                        
             if black_count > white_count:
                 self.state = self.GAME_STATES['BLACK_WINS']
             elif white_count > black_count:
