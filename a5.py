@@ -34,6 +34,24 @@ def print_turn(turn):
     print("--------------------")
 
 
+def print_black_wins():
+    print("<><><><><><><>")
+    print("| WHITE WINS |")
+    print("<><><><><><><>")
+
+
+def print_white_wins():
+    print("<><><><><><><>")
+    print("| BLACK WINS |")
+    print("<><><><><><><>")
+
+
+def print_draw_screen():
+    print("<><><><>")
+    print("| DRAW |")
+    print("<><><><>")
+
+
 def get_menu_input():
     while True:
         try:
