@@ -91,6 +91,7 @@ def print_legal_moves(legal_moves):
 
 def main():
     print("initializing.............")
+    
     initial_board = np.array([  [" ", " ", " ", " ", " ", " ", " ", " "], 
                                 [" ", " ", " ", " ", " ", " ", " ", " "], 
                                 [" ", " ", " ", " ", " ", " ", " ", " "], 

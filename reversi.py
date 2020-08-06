@@ -13,6 +13,8 @@ class Reversi:
         self.turn = turn
         self.state = self.GAME_STATES['IN_PROGRESS']
         self.legal_moves = None
+        self.black_no_moves_flag = False
+        self.white_no_moves_flag = False
     
     def find_legal_positions(self):
         valid = [] 
@@ -34,6 +36,17 @@ class Reversi:
                         valid.append(np.array([row, col]))
 
         self.legal_moves = np.array(valid)
+        if len(self.legal_moves) == 0:
+            if self.turn == 'b':
+                self.black_no_moves_flag = True
+            elif self.turn == 'w':
+                self.white_no_moves_flag = True
+        else:
+            if self.turn == 'b':
+                self.black_no_moves_flag = False
+            elif self.turn == 'w':
+                self.white_no_moves_flag = False
+            
         return valid
 
     def check_valid_moves(self, delta_row, delta_col, row , col): 
@@ -126,7 +139,9 @@ class Reversi:
     def update_state(self):
         if len(self.legal_moves) != 0:
             self.state = self.GAME_STATES['IN_PROGRESS']
-        else:
+            
+
+        elif self.black_no_moves_flag and self.white_no_moves_flag:
             black_count = 0
             white_count = 0
 
