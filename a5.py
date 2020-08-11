@@ -25,13 +25,31 @@ def print_main_menu():
     print("4. exit")
 
 
-def print_turn(turn):
-    print("--------------------")
-    if turn == "b":
-        print("black's turn to play")
-    elif turn == "w":
-        print("white's turn to play")
-    print("--------------------")
+def print_turn(turn, player_vs_ai_flag, GMHikaru_flag, Botez_flag, player_color):
+
+    if player_vs_ai_flag:
+        if turn == player_color:
+            print("--------------------------")
+            print("player's (%s) turn to play" %turn)
+            print("--------------------------")
+        else:
+            if GMHikaru_flag:
+                print("-----------------------------")
+                print("GM Hikaru's (%s) turn to play" %turn)
+                print("-----------------------------")
+            elif Botez_flag:
+                print("-------------------------")
+                print("Botez's (%s) turn to play" %turn)
+                print("-------------------------")
+    elif GMHikaru_flag and Botez_flag:
+        if turn == "b":
+            print("-----------------------------")
+            print("GM Hikaru's (%s) turn to play" %turn)
+            print("-----------------------------")
+        if turn == "w" :
+            print("-------------------------")
+            print("Botez's (%s) turn to play" %turn)
+            print("-------------------------")
 
 
 def print_black_wins():
@@ -64,6 +82,14 @@ def get_menu_input():
             continue
         return menu_input
 
+
+def ask_for_player_color():
+    while True:
+        player_color = input("What do you want to be? [b/w]:")
+        if player_color == "b" or player_color == "w":
+            return player_color
+        else:
+            print("please input 'b' or 'w' ")
 
 def print_board(board):
     print("    0   1   2   3   4   5   6   7 ")
@@ -121,48 +147,72 @@ def main():
     sleep(1)
     clear_screen()
     while True:
-        player_flag = False
+        player_vs_ai_flag = False
         GMHikaru_flag = False
         Botez_flag = False
+        player_color = None
         print_main_menu()
         menu_input = get_menu_input()
         if menu_input != 4:
             starts_first = choice(np.array(["b", "w"])) 
-            game = Reversi(board=initial_board, turn="b")
             if menu_input == 1:
-                player_flag = True
+                player_vs_ai_flag = True
+                player_color = ask_for_player_color()
                 GMHikaru_flag = True
                 gm_hikaru_ai = GMHikaru()
+                if player_color == "b":
+                    game = Reversi(board=initial_board, turn=starts_first, white="gm_hikaru")
+                elif player_color == "w":
+                    game = Reversi(board=initial_board, turn=starts_first, black="gm_hikaru")
             elif menu_input == 2:
-                player_flag = True
+                player_vs_ai_flag = True
+                player_color = ask_for_player_color()
                 Botez_flag = True
                 botez_ai = Botez()
+                if player_color == "b":
+                    game = Reversi(board=initial_board, turn=starts_first, white="botez")
+                elif player_color == "w":
+                    game = Reversi(board=initial_board, turn=starts_first, black="botez")
             elif menu_input == 3:
                 GMHikaru_flag = True
                 gm_hikaru_ai = GMHikaru()
                 Botez_flag = True
                 botez_ai = Botez()
+                game = Reversi(board=initial_board, turn=starts_first, black="gm_hikaru", white="botez")
             while True:
-                print_turn(game.turn)
+                print_turn(game.turn, player_vs_ai_flag, GMHikaru_flag, Botez_flag, player_color)
                 print_board(game.board)
                 legal_moves = game.find_legal_positions()
                 if len(legal_moves) != 0:
-                    if game.turn == "b" and player_flag: # make sure that player is always black
-                        while True:
-                            print_legal_moves(legal_moves)
-                            board_coordinate = get_board_coordinate()
-                            if game.is_move_valid(board_coordinate):
-                                break
-                            else:
-                                print("please pick a legal move coordinate")
-                    else:
-                        if GMHikaru_flag:
-                            board_coordinate = gm_hikaru_ai.find_best_move(game.board, game.turn)     
-                        if Botez_flag:
+                    if player_vs_ai_flag: 
+                        if game.turn == player_color:
+                            while True:
+                                print_legal_moves(legal_moves)
+                                board_coordinate = get_board_coordinate()
+                                if game.is_move_valid(board_coordinate):
+                                    break
+                                else:
+                                    print("please pick a legal move coordinate")
+                        else:
+                            if GMHikaru_flag:
+                                start = time()
+                                board_coordinate = gm_hikaru_ai.find_best_move(board=game.board, turn=game.turn, white=game.white, black=game.black)     
+                                print("GMHikaru took %.2f to make a move" %(time() - start))
+                            if Botez_flag:
+                                start = time()
+                                board_coordinate = botez_ai.find_best_move(board=game.board, turn=game.turn, white=game.white, black=game.black)
+                                print("Botez took %.2f to make a move" %(time() - start))
+                        game.place_tile(board_coordinate)
+                    elif GMHikaru_flag and Botez_flag: # ai vs ai
+                        if game.turn == "b": # GM Hikaru plays
                             start = time()
-                            board_coordinate = botez_ai.find_best_move(game.board, game.turn)
+                            board_coordinate = gm_hikaru_ai.find_best_move(board=game.board, turn=game.turn, white=game.white, black=game.black)     
+                            print("GMHikaru took %.2f to make a move" %(time() - start))
+                        if game.turn == "w": # Botez plays
+                            start = time()
+                            board_coordinate = botez_ai.find_best_move(board=game.board, turn=game.turn, white=game.white, black=game.black)
                             print("Botez took %.2f to make a move" %(time() - start))
-                    game.place_tile(board_coordinate)
+                        game.place_tile(board_coordinate)
                 game.update_state()
                 if game.state == "In progress":
                     game.switch_turn()
