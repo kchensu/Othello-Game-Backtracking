@@ -7,14 +7,19 @@ class Reversi:
         "WHITE_WINS": 'White wins',
         "TIE": 'Tie'
     }
+
     
-    def __init__(self, board, turn):
+    def __init__(self, board, turn, black= 'player', white = 'player'):
         self.board = board
         self.turn = turn
         self.state = self.GAME_STATES['IN_PROGRESS']
         self.legal_moves = None
         self.black_no_moves_flag = False
         self.white_no_moves_flag = False
+        self.black_count = 0
+        self.white_count = 0
+        self.black = black
+        self.white = white
     
     def find_legal_positions(self):
         valid = [] 
@@ -90,7 +95,6 @@ class Reversi:
         return self.check_line(delta_row, delta_col, row + delta_row, col + delta_col)
     
     def flip_token(self, row, col):
-      
         self.flip_line(-1, -1, row, col)
         self.flip_line(-1,  1, row, col)
         self.flip_line(-1,  0, row, col)
@@ -99,8 +103,6 @@ class Reversi:
         self.flip_line( 1,  0, row, col)
         self.flip_line( 0, -1, row, col)
         self.flip_line( 0,  1, row, col)
-     
-    
     def flip_line(self, delta_row, delta_col, row, col):
   
         if row + delta_row < 0 or row + delta_row >= 8:
@@ -110,6 +112,7 @@ class Reversi:
         if self.board[row + delta_row][col + delta_col] == " ":
             return False
         if self.board[row + delta_row][col + delta_col] == self.turn:
+
             return True
         else:
             if self.flip_line(delta_row, delta_col, row + delta_row, col + delta_col):
@@ -142,23 +145,21 @@ class Reversi:
             
 
         elif self.black_no_moves_flag and self.white_no_moves_flag:
-            black_count = 0
-            white_count = 0
-
+           
             for i in range(8):
                 for j in range(8):
                     if self.board[i][j] == " ":
                         continue
                     elif self.board[i][j] == 'b':
-                        black_count += 1
+                        self.black_count += 1
                     elif self.board[i][j] == 'w':
-                        white_count += 1
+                        self.white_count += 1
                         
-            if black_count > white_count:
+            if self.black_count > self.white_count:
                 self.state = self.GAME_STATES['BLACK_WINS']
-            elif white_count > black_count:
+            elif self.white_count > self.black_count:
                 self.state = self.GAME_STATES['WHITE_WINS']
-            elif white_count == black_count:
+            elif self.white_count == self.black_count:
                 self.state = self.GAME_STATES['TIE']
             
     
