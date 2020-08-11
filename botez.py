@@ -22,9 +22,15 @@ class Botez:
             if game.state == "Tie": # if draw 
                 return 1
             if game.state == "White wins": # if Botez (AI) wins 
-                return 1
+                if game.white == 'player' or game.white == 'gm_hikaru':
+                    return -1
+                else:
+                    return 1
             if game.state == "Black wins": # if player wins 
-                return -1
+                if game.black == 'player' or game.black == 'gm_hikaru':
+                    return -1
+                else:
+                    return 1
             if game.state == "In progress": # game has not ended
                 game.switch_turn()
             
@@ -43,9 +49,9 @@ class Botez:
         score = sum(score)
         return score
 
-    def find_best_move(self, board, turn):
+    def find_best_move(self, board, turn, black, white):
         """ find the best move """
-        game = Reversi(board=board, turn=turn)
+        game = Reversi(board=board, turn=turn, black= black,white= white)
         legal_moves = game.find_legal_positions()
         if len(legal_moves) == 1: # no reason to predict future moves when there is only one move left
             best_move = legal_moves[0]
@@ -53,14 +59,15 @@ class Botez:
         score_list = []
         start = time()
         for move in legal_moves: # for each legal move
-            if time() - start >= 5:
+            if time() - start >= 3:
                 print("Times up.....")
                 break
             possible_game_state_after_legal_move = deepcopy(game) # make a copy of the current game
             possible_game_state_after_legal_move.place_tile(move) # play the legal move
             possible_game_state_after_legal_move.switch_turn() 
-            score = self.train(possible_game_state_after_legal_move, N= 1) # ployout game N times
+            score = self.train(possible_game_state_after_legal_move, N= 500) # ployout game N times
             score_list.append(score)
+        print("The score list:", score_list)
         highest_score_index = score_list.index(max(score_list)) # pick the score with the most wins, highest score
         best_move = legal_moves[highest_score_index]
         print("Best move:", best_move)
