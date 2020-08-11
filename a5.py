@@ -36,13 +36,14 @@ def print_turn(turn):
 
 def print_black_wins():
     print("<><><><><><><>")
-    print("| WHITE WINS |")
+    print("| BLACK WINS |")
     print("<><><><><><><>")
+    
 
 
 def print_white_wins():
     print("<><><><><><><>")
-    print("| BLACK WINS |")
+    print("| WHITE WINS |")
     print("<><><><><><><>")
 
 
@@ -120,6 +121,7 @@ def main():
                                 [" ", " ", " ", " ", " ", " ", " ", " "]])
     sleep(1)
     clear_screen()
+
     while True:
         player_flag = False
         GMHikaru_flag = False
@@ -142,6 +144,12 @@ def main():
                 gm_hikaru_ai = GMHikaru()
                 Botez_flag = True
                 botez_ai = Botez()
+            game_time = time() 
+
+
+            if GMHikaru_flag == True and Botez_flag == True:
+
+
             while True:
                 print_turn(game.turn)
                 print_board(game.board)
@@ -157,7 +165,10 @@ def main():
                                 print("please pick a legal move coordinate")
                     else:
                         if GMHikaru_flag:
-                            board_coordinate = gm_hikaru_ai.find_best_move(game.board, game.turn)     
+                            start = time()
+                            board_coordinate = gm_hikaru_ai.find_best_move(game.board, game.turn)
+                            print("GMHikaru took %.2f to make a move" %(time() - start))
+        
                         if Botez_flag:
                             start = time()
                             board_coordinate = botez_ai.find_best_move(game.board, game.turn)
@@ -167,18 +178,30 @@ def main():
                 if game.state == "In progress":
                     game.switch_turn()
                     continue
+            
                 elif game.state == "Black wins":
                     print_board(game.board)
                     print_black_wins()
+                    print(game.black_count)
+                    print(game.white_count)
+                    print("Game time: %.2f" %(time() - game_time))
                     break
                 elif game.state == "White wins":
                     print_board(game.board)
                     print_white_wins()
+                    print(game.black_count)
+                    print(game.white_count)
+                    print("Game time: %.2f" %(time() - game_time))
                     break
                 elif game.state == "Tie":
                     print_board(game.board)
                     print_draw_screen()
+                    print(game.black_count)
+                    print(game.white_count)
+                    print("Game time: %.2f" %(time() - game_time))
                     break
+            # print("Game time: %.2f" %(time() - game_time))
+                
         else:
             break
 
