@@ -1,11 +1,9 @@
 from reversi import *
 from copy import deepcopy
-from time import time
 from random import choice
 # from multiprocessing.pool import Pool
 import multiprocessing
-
-
+from time import time
 
 class Botez:
     """ Botez is a Reversi AI that uses Monte Carlo Search """
@@ -14,6 +12,7 @@ class Botez:
 
     def playout(self, game):
         """ playout a given game randomly, return a score of 1 if it results in a win or draw and a score of -1 it it is a loss """
+
         while game.state == "In progress":
             legal_moves = game.find_legal_positions()
             if len(legal_moves) != 0:
@@ -33,8 +32,7 @@ class Botez:
         """ return total training score of N random playouts """
         score = 0
         playout_time_list = []
-        start = time()
-        pool = multiprocessing.Pool()
+        pool = multiprocessing.Pool(processes= 12 )
         nums = []
         for i in range(N): # do N number of random playouts
             temp_game = deepcopy(game)
@@ -53,11 +51,15 @@ class Botez:
             best_move = legal_moves[0]
             return best_move
         score_list = []
+        start = time()
         for move in legal_moves: # for each legal move
+            if time() - start >= 5:
+                print("Times up.....")
+                break
             possible_game_state_after_legal_move = deepcopy(game) # make a copy of the current game
             possible_game_state_after_legal_move.place_tile(move) # play the legal move
             possible_game_state_after_legal_move.switch_turn() 
-            score = self.train(possible_game_state_after_legal_move, N=100) # ployout game N times
+            score = self.train(possible_game_state_after_legal_move, N= 1) # ployout game N times
             score_list.append(score)
         highest_score_index = score_list.index(max(score_list)) # pick the score with the most wins, highest score
         best_move = legal_moves[highest_score_index]
