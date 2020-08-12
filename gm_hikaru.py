@@ -5,155 +5,95 @@ from random import choice
 # from multiprocessing.pool import Pool
 import multiprocessing
 
-a = (8, 8)
-strategy_weights = np.zeros(a)
-strategy_weights.astype(int)
-strategy_weights[0, 0] = 20
-strategy_weights[0, 1] = -10
-strategy_weights[0, 2] = 10
-strategy_weights[0, 3] = 5
-strategy_weights[0, 4] = 5
-strategy_weights[0, 5] = 10
-strategy_weights[0, 6] = -10
-strategy_weights[0, 7] = 20
-
-strategy_weights[1, 0] = -10
-strategy_weights[1, 1] = -20
-strategy_weights[1, 2] = -5
-strategy_weights[1, 3] = -5
-strategy_weights[1, 4] = -5
-strategy_weights[1, 5] = -5
-strategy_weights[1, 6] = -20
-strategy_weights[1, 7] = -10 
-
-strategy_weights[2, 0] = 10
-strategy_weights[2, 1] = -5
-strategy_weights[2, 2] = 10
-strategy_weights[2, 3] = 0
-strategy_weights[2, 4] = 0
-strategy_weights[2, 5] = 10
-strategy_weights[2, 6] = -0
-strategy_weights[2, 7] = 10 
-
-strategy_weights[3, 0] = 5
-strategy_weights[3, 1] = -5
-strategy_weights[3, 2] = 0
-strategy_weights[3, 3] = 0
-strategy_weights[3, 4] = 0
-strategy_weights[3, 5] = 0
-strategy_weights[3, 6] = -5
-strategy_weights[3, 7] = 5 
-
-strategy_weights[4, 0] = 5
-strategy_weights[4, 1] = -5
-strategy_weights[4, 2] = 0
-strategy_weights[4, 3] = 0
-strategy_weights[4, 4] = 0
-strategy_weights[4, 5] = 0
-strategy_weights[4, 6] = -5
-strategy_weights[4, 7] = 5
-
-strategy_weights[5, 0] = 10
-strategy_weights[5, 1] = -5
-strategy_weights[5, 2] = 10
-strategy_weights[5, 3] = 0
-strategy_weights[5, 4] = 0
-strategy_weights[5, 5] = 10
-strategy_weights[5, 6] = -5
-strategy_weights[5, 7] = 10
-
-strategy_weights[6, 0] = -10
-strategy_weights[6, 1] = -20
-strategy_weights[6, 2] = -5
-strategy_weights[6, 3] = -5
-strategy_weights[6, 4] = -5
-strategy_weights[6, 5] = -5
-strategy_weights[6, 6] = -20
-strategy_weights[6, 7] = -10 
-
-strategy_weights[7, 0] = 20
-strategy_weights[7, 1] = -10
-strategy_weights[7, 2] = 10
-strategy_weights[7, 3] = 5
-strategy_weights[7, 4] = 5
-strategy_weights[7, 5] = 10
-strategy_weights[7, 6] = -10
-strategy_weights[7, 7] = 20
-
 class GMHikaru:
-    """ Botez is a Reversi AI that uses Monte Carlo Search """
+    """ GMHikaru is a Reversi AI that uses Monte Carlo Search """
     def __init__(self):
-        pass
-
-    def playout(self, game):
-        """ playout a given game randomly, return a score of 1 if it results in a win or draw and a score of -1 it it is a loss """
-        while game.state == "In progress":
-            legal_moves = game.find_legal_positions()
-            if len(legal_moves) != 0:
-                random_position = choice(legal_moves)
-                game.place_tile(random_position)
-            game.update_state()
-            if game.state == "Tie": # if draw 
-                return 1
-            if game.state == "Black wins": # if GMHikaru (AI) wins 
-                if game.black == 'player' or game.black == 'botez':
-                    return -1
-                else:
-                    return 1
-            if game.state == "White wins": # if player wins 
-                if game.white == 'player' or game.white == 'botez':
-                    return -1
-                else:
-                    return 1
-            if game.state == "In progress": # game has not ended
-                game.switch_turn()
-            
-    def train(self, game, N):
-        """ return total training score of N random playouts """
+          self.strategy_weights = np.array([[1000, 50,   100,   100,  100,  100,  50, 1000],
+                                           [  50,  -20,  -10,  -10,  -10,  -10,  -20,   50], 
+                                           [ 100,  -10,    0,    0,    0,    0,  -10,  100], 
+                                           [ 100,  -10,    0,    0,    0,    0,  -10,  100],
+                                           [ 100,  -10,    0,    0,    0,    0,  -10,  100], 
+                                           [ 100,  -10,    0,    0,    0,    0,  -10,  100], 
+                                           [  50,  -20,  -10,  -10,  -10,  -10,  -20,   50], 
+                                           [1000,   50,  100,  100,  100,  100,   50, 1000]])
+    
+    def eval_fn(self, board, turn):
         score = 0
-        playout_time_list = []
-        start = time()
-        pool = multiprocessing.Pool(processes= 12 )
-        nums = []
-        for i in range(N): # do N number of random playouts
+        rest = 0
+        opp = None
+        if turn == "b":
+            opp = 'w'
+        elif turn == "w":
+            opp = 'b'
+        for i in range(8):
+            for j in range(8):
+                test = board[i][j]
+                if test == turn:
+                    score += self.strategy_weights[i][j]
+                elif test == opp:
+                    score -= self.strategy_weights[i][j]
+                else:
+                    rest +=1
+        if score >= 0:
+            score += (128-rest*2)
+        else:
+            score -= (128-rest*2)
+        return score
+    
+    def min_max(self, depth, alpha, beta, game):
+        maximizing_color = game.turn
+        if depth ==0:
             temp_game = deepcopy(game)
-            nums.append(temp_game)
-        score = pool.map(self.playout, nums)
-        pool.close()
-        pool.join()
-        score = sum(score)
+            score = self.eval_fn(game.board, maximizing_color)
+            return score
+        
+        legal_moves = game.find_legal_positions()
+        if len(legal_moves) == 0:
+            temp_game = deepcopy(game)
+            score = self.min_max(depth -1, alpha, beta, temp_game)
+            return score
+        else:
+            for move in legal_moves:
+                temp_game = deepcopy(game)
+                temp_game.place_tile(move)
+                temp_game.switch_turn()
+                temp_game.update_state()
+                test = self.min_max(depth -1,  alpha, beta, temp_game)
+
+                if maximizing_color == game.turn:
+                    if alpha == None or test > alpha:
+                        alpha = test
+                else:
+                    if beta == None or test < beta:
+                        beta = test
+                if alpha != None and beta != None and beta <= alpha:
+                    break
+
+        if maximizing_color == game.turn:
+            score = alpha
+        else:
+            score = beta
         return score
 
     def find_best_move(self, board, turn, black, white):
-        """ find the best move """
-        game = Reversi(board=board, turn=turn, black=black, white=white)
+        alpha = None
+        beta = None
+        best_move = None
+        depth = 6
+
+        game = Reversi(board=board, turn= turn, black=black, white=white)
         legal_moves = game.find_legal_positions()
-        if len(legal_moves) == 1: # no reason to predict future moves when there is only one move left
-            best_move = legal_moves[0]
-            return best_move
-        score_list = []
-        
-        start = time()
-        for move in legal_moves: # for each legal move
-            if time() - start >= 3:
-                print("Times up.....")
-                break
-            
-            possible_game_state_after_legal_move = deepcopy(game) # make a copy of the current game
-            possible_game_state_after_legal_move.place_tile(move) # play the legal move
-            possible_game_state_after_legal_move.switch_turn() 
-            score = self.train(possible_game_state_after_legal_move, N= 500) # ployout game N times
-            score_list.append(score)
-        print("There score list: ", score_list)
-        new_score_list = []
-        for i in range(len(score_list)):
-            index = legal_moves[i]
-            w1 = index[0]
-            w2 = index[1]
-            weights = strategy_weights[w1, w2]
-            new_score = weights + i
-            new_score_list.append(new_score)
-        highest_score_index = new_score_list.index(max(new_score_list)) # pick the score with the most wins, highest score
-        best_move = legal_moves[highest_score_index]
-        print("Best move:", best_move)
-        return best_move
+        for move in legal_moves:
+            if alpha is not None:
+                beta = -1*alpha
+
+            temp_game = deepcopy(game)
+            temp_game.place_tile(move)
+            temp_game.switch_turn()
+            temp_game.update_state()    
+            test = self.min_max(depth-1, alpha, beta, temp_game)
+
+            if alpha == None or test > alpha:
+                alpha = test
+                bestmove = move
+        return bestmove

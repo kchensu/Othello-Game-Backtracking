@@ -204,25 +204,7 @@ def main():
                                             [" ", " ", " ", " ", " ", " ", " ", " "], 
                                             [" ", " ", " ", " ", " ", " ", " ", " "], 
                                             [" ", " ", " ", " ", " ", " ", " ", " "]])
-    
-    test = Reversi(initial_board, 'b')
-    test.find_legal_positions()
-    print(test.find_legal_positions())
-    test.update_state()
-    test.place_tile([5, 2])
-    print_board(test.board)
-    test.switch_turn()
    
-    # test.place_tile([0,5])
-    # print_board(test.board)
-    # test.switch_turn()
-    # test.place_tile([4,5])
-    # print_board(test.board)
-    # print(test.find_legal_positions())
-
-   
-
-
 if __name__ == "__main__":
     main()
 

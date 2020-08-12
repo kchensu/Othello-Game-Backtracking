@@ -42,11 +42,11 @@ def print_turn(turn, player_vs_ai_flag, GMHikaru_flag, Botez_flag, player_color)
                 print("Botez's (%s) turn to play" %turn)
                 print("-------------------------")
     elif GMHikaru_flag and Botez_flag:
-        if turn == "b":
+        if turn == "w":
             print("-----------------------------")
             print("GM Hikaru's (%s) turn to play" %turn)
             print("-----------------------------")
-        if turn == "w" :
+        if turn == "b" :
             print("-------------------------")
             print("Botez's (%s) turn to play" %turn)
             print("-------------------------")
@@ -153,6 +153,7 @@ def main():
         GMHikaru_flag = False
         Botez_flag = False
         player_color = None
+        menu_input = None
         print_main_menu()
         menu_input = get_menu_input()
         if menu_input != 4:
@@ -181,8 +182,8 @@ def main():
                 Botez_flag = True
                 botez_ai = Botez()
                 game = Reversi(board=initial_board, turn=starts_first, black="gm_hikaru", white="botez")
+            game_time = time()
             while True:
-                game_time = time()
                 print_turn(game.turn, player_vs_ai_flag, GMHikaru_flag, Botez_flag, player_color)
                 print_board(game.board)
                 legal_moves = game.find_legal_positions()
@@ -197,55 +198,58 @@ def main():
                                 else:
                                     print("please pick a legal move coordinate")
                         else:
-                            if GMHikaru_flag:
-                                start = time()
-                                board_coordinate = gm_hikaru_ai.find_best_move(board=game.board, turn=game.turn, white=game.white, black=game.black)     
-                                print("GMHikaru took %.2f to make a move" %(time() - start))
                             if Botez_flag:
                                 start = time()
                                 board_coordinate = botez_ai.find_best_move(board=game.board, turn=game.turn, white=game.white, black=game.black)
+                                print("Botez played:", board_coordinate) 
                                 print("Botez took %.2f to make a move" %(time() - start))
+                            if GMHikaru_flag:
+                                start = time()
+                                board_coordinate = gm_hikaru_ai.find_best_move(board=game.board, turn=game.turn, white=game.white, black=game.black)
+                                print("Hikaru played:", board_coordinate)      
+                                print("GMHikaru took %.2f to make a move" %(time() - start))
                         game.place_tile(board_coordinate)
                     elif GMHikaru_flag and Botez_flag: # ai vs ai
-                        if game.turn == "b": # GM Hikaru plays
+                        if game.turn == "w": # GM Hikaru plays
                             start = time()
-                            board_coordinate = gm_hikaru_ai.find_best_move(board=game.board, turn=game.turn, white=game.white, black=game.black)     
+                            board_coordinate = gm_hikaru_ai.find_best_move(board=game.board, turn=game.turn, white=game.white, black=game.black)
+                            print("Hikaru played:", board_coordinate)   
                             print("GMHikaru took %.2f to make a move" %(time() - start))
-                        if game.turn == "w": # Botez plays
+                            game.place_tile(board_coordinate)
+                        if game.turn == "b": # Botez plays
                             start = time()
                             board_coordinate = botez_ai.find_best_move(board=game.board, turn=game.turn, white=game.white, black=game.black)
+                            print("Botez played:", board_coordinate)
                             print("Botez took %.2f to make a move" %(time() - start))
-                        game.place_tile(board_coordinate)
+                            game.place_tile(board_coordinate)       
                 game.update_state()
                 if game.state == "In progress":
                     game.switch_turn()
                     continue
-            
                 elif game.state == "Black wins":
-                    print_board(game.board)
                     print_black_wins()
-                    print(game.black_count)
-                    print(game.white_count)
+                    print_board(game.board)
+                    print("Black:", game.black_count)
+                    print("White:", game.white_count)
                     print("Game time: %.2f" %(time() - game_time))
                     break
                 elif game.state == "White wins":
-                    print_board(game.board)
                     print_white_wins()
-                    print(game.black_count)
-                    print(game.white_count)
+                    print_board(game.board)
+                    print("Black:", game.black_count)
+                    print("White:", game.white_count)
                     print("Game time: %.2f" %(time() - game_time))
                     break
                 elif game.state == "Tie":
-                    print_board(game.board)
                     print_draw_screen()
-                    print(game.black_count)
-                    print(game.white_count)
+                    print_board(game.board)
+                    print("Black:", game.black_count)
+                    print("White:", game.white_count)
                     print("Game time: %.2f" %(time() - game_time))
-                    break
-            # print("Game time: %.2f" %(time() - game_time))
-                
+                    break     
         else:
             break
+        break
 
 
 if __name__ == "__main__":

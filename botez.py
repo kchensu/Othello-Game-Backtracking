@@ -18,6 +18,7 @@ class Botez:
             if len(legal_moves) != 0:
                 random_position = choice(legal_moves)
                 game.place_tile(random_position)
+
             game.update_state()
             if game.state == "Tie": # if draw 
                 return 1
@@ -38,7 +39,7 @@ class Botez:
         """ return total training score of N random playouts """
         score = 0
         playout_time_list = []
-        pool = multiprocessing.Pool(processes= 12 )
+        pool = multiprocessing.Pool(processes= 4 )
         nums = []
         for i in range(N): # do N number of random playouts
             temp_game = deepcopy(game)
@@ -51,7 +52,7 @@ class Botez:
 
     def find_best_move(self, board, turn, black, white):
         """ find the best move """
-        game = Reversi(board=board, turn=turn, black= black,white= white)
+        game = Reversi(board=board, turn=turn, black=black, white=white)
         legal_moves = game.find_legal_positions()
         if len(legal_moves) == 1: # no reason to predict future moves when there is only one move left
             best_move = legal_moves[0]
@@ -59,16 +60,18 @@ class Botez:
         score_list = []
         start = time()
         for move in legal_moves: # for each legal move
-            if time() - start >= 3:
-                print("Times up.....")
-                break
+            if len(legal_moves) <= 2:
+                N = 1000
+            elif len(legal_moves) > 3 and len(legal_moves) <= 6:
+                N = 200
+            else:
+                N = 50
             possible_game_state_after_legal_move = deepcopy(game) # make a copy of the current game
             possible_game_state_after_legal_move.place_tile(move) # play the legal move
+            possible_game_state_after_legal_move.update_state()
             possible_game_state_after_legal_move.switch_turn() 
-            score = self.train(possible_game_state_after_legal_move, N= 500) # ployout game N times
+            score = self.train(possible_game_state_after_legal_move, N) # ployout game N times
             score_list.append(score)
-        print("The score list:", score_list)
         highest_score_index = score_list.index(max(score_list)) # pick the score with the most wins, highest score
         best_move = legal_moves[highest_score_index]
-        print("Best move:", best_move)
         return best_move
